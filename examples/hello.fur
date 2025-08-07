@@ -1,0 +1,6 @@
+meow dogName = "Buddy"
+meow catName = "Whiskers"
+
+purr("Welcome to the pet store!")
+purr(dogName)
+purr(catName)

@@ -1,0 +1,14 @@
+{
+    "name": "furryscript",
+    "module": "index.ts",
+    "type": "module",
+    "devDependencies": {
+        "@types/bun": "^1.2.19"
+    },
+    "peerDependencies": {
+        "typescript": "^5.0.0"
+    },
+    "scripts": {
+        "dev": "bun run src/index.ts"
+    }
+}
