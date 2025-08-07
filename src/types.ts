@@ -5,10 +5,11 @@ export enum TokenType {
     FLOAT = 'FLOAT',
     IDENTIFIER = 'IDENTIFIER',
 
-    // Keywords  
-    PURR = 'PURR',      // print function
-    MEOW = 'MEOW',      // variable declaration
-    WOOF = 'WOOF',      // variable access
+    // Keywords
+    TRICK = 'TRICK', // Function declaration
+    PURR = 'PURR', // print function
+    MEOW = 'MEOW', // variable declaration
+    WOOF = 'WOOF', // variable access
 
     // Operators/Punctuation
     EQUALS = 'EQUALS',
@@ -28,42 +29,73 @@ export interface Token {
 }
 
 // AST Node types
+export enum NodeType {
+    Program = 'Program',
+    StringLiteral = 'StringLiteral',
+    IntegerLiteral = 'IntegerLiteral',
+    FloatLiteral = 'FloatLiteral',
+    Identifier = 'Identifier',
+    PrintStatement = 'PrintStatement',
+    VariableDeclaration = 'VariableDeclaration',
+    VariableAccess = 'VariableAccess',
+    BinaryExpression = 'BinaryExpression',
+    UnaryExpression = 'UnaryExpression',
+}
+
 export interface ASTNode {
-    type: string;
+    type: NodeType;
+}
+
+export interface Program extends ASTNode {
+    type: NodeType.Program;
+    body: ASTNode[];
 }
 
 export interface StringLiteral extends ASTNode {
-    type: 'StringLiteral';
+    type: NodeType.StringLiteral;
     value: string;
 }
 
 export interface IntegerLiteral extends ASTNode {
-    type: 'IntegerLiteral';
+    type: NodeType.IntegerLiteral;
+    value: number;
+}
+
+export interface FloatLiteral extends ASTNode {
+    type: NodeType.FloatLiteral;
     value: number;
 }
 
 export interface Identifier extends ASTNode {
-    type: 'Identifier';
+    type: NodeType.Identifier;
     name: string;
 }
 
 export interface PrintStatement extends ASTNode {
-    type: 'PrintStatement';
+    type: NodeType.PrintStatement;
     argument: ASTNode;
 }
 
 export interface VariableDeclaration extends ASTNode {
-    type: 'VariableDeclaration';
+    type: NodeType.VariableDeclaration;
     name: string;
     value: ASTNode;
 }
 
 export interface VariableAccess extends ASTNode {
-    type: 'VariableAccess';
+    type: NodeType.VariableAccess;
     name: string;
 }
 
-export interface Program extends ASTNode {
-    type: 'Program';
-    body: ASTNode[];
+export interface BinaryExpression extends ASTNode {
+    type: NodeType.BinaryExpression;
+    operator: string;
+    left: ASTNode;
+    right: ASTNode;
+}
+
+export interface UnaryExpression extends ASTNode {
+    type: NodeType.UnaryExpression;
+    operator: string;
+    argument: ASTNode;
 }

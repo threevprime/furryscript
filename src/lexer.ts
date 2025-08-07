@@ -19,8 +19,7 @@ export class Lexer {
         this.position++;
 
         if (char === '\n') {
-            this.line++;
-            this.column = 1;
+            this.line++; this.column = 1;
         } else {
             this.column++;
         }
@@ -69,12 +68,30 @@ export class Lexer {
         return value;
     }
 
-    private readNumber(): string {
+    private readNumber(): Token {
         let value = '';
+        const line = this.line;
+        const column = this.column;
+        let isFloat = false;
+
         while (/[0-9]/.test(this.peek())) {
             value += this.advance();
         }
-        return value;
+
+        if (this.peek() === '.' && /[0-9]/.test(this.source[this.position + 1])) {
+            isFloat = true;
+            value += this.advance(); // consume '.'
+            while (/[0-9]/.test(this.peek())) {
+                value += this.advance();
+            }
+        }
+
+        return {
+            type: isFloat ? TokenType.FLOAT : TokenType.INTEGER,
+            value,
+            line,
+            column,
+        };
     }
 
     private readIdentifier(): string {
@@ -83,10 +100,6 @@ export class Lexer {
             value += this.advance();
         }
         return value;
-    }
-
-    private isInteger(value: string): boolean {
-        return /^-?[0-9]+$/.test(value);
     }
 
     public tokenize(): Token[] {
@@ -113,12 +126,15 @@ export class Lexer {
             } else if (char === '=') {
                 this.advance();
                 tokens.push({ type: TokenType.EQUALS, value: '=', line, column });
-            } else if (char === '+' || char === '-' || char === '*' || char === '/') {
+            } else if (char === '+' || char === '*' || char === '/') {
                 this.advance();
                 tokens.push({ type: TokenType.BINARY_OPERATOR, value: char, line, column });
-            } else if (this.isInteger(char)) {
-                const number = this.readNumber();
-                tokens.push({ type: TokenType.INTEGER, value: number, line, column });
+            } else if (char === '-') {
+                this.advance();
+                tokens.push({ type: TokenType.BINARY_OPERATOR, value: char, line, column });
+            } else if (/[0-9]/.test(char)) {
+                const numberToken = this.readNumber();
+                tokens.push(numberToken);
             } else if (/[a-zA-Z_]/.test(char)) {
                 const identifier = this.readIdentifier();
                 let tokenType: TokenType;

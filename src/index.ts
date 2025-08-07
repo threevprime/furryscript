@@ -6,10 +6,7 @@ export function runFurryScript(source: string): void {
     try {
         const lexer = new Lexer(source);
         const tokens = lexer.tokenize();
-
-        const parser = new Parser(tokens);
-        const ast = parser.parse();
-
+        const ast = Parser.parse(tokens);
         const interpreter = new Interpreter();
         interpreter.interpret(ast);
     } catch (error: any) {

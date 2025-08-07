@@ -1,4 +1,19 @@
-import { TokenType, type StringLiteral, type Token, type Identifier, type PrintStatement, type VariableDeclaration, type VariableAccess, type Program, type ASTNode, type IntegerLiteral } from "./types";
+import {
+    TokenType,
+    type Token,
+    type ASTNode,
+    type Program,
+    type StringLiteral,
+    type IntegerLiteral,
+    type FloatLiteral,
+    type Identifier,
+    type PrintStatement,
+    type VariableDeclaration,
+    type VariableAccess,
+    type UnaryExpression,
+    type BinaryExpression,
+    NodeType,
+} from './types';
 
 export class Parser {
     private tokens: Token[];
@@ -26,83 +41,16 @@ export class Parser {
         return this.advance();
     }
 
-    private parseStringLiteral(): StringLiteral {
-        const token = this.expect(TokenType.STRING);
-        return {
-            type: 'StringLiteral',
-            value: token.value
-        };
-    }
-
-    private parseIntegerLiteral(): IntegerLiteral {
-        const token = this.expect(TokenType.INTEGER);
-        return {
-            type: 'IntegerLiteral',
-            value: parseInt(token.value, 10)
-        };
-    }
-
-    private parseIdentifier(): Identifier {
-        const token = this.expect(TokenType.IDENTIFIER);
-        return {
-            type: 'Identifier',
-            name: token.value
-        };
-    }
-
-    private parsePrintStatement(): PrintStatement {
-        this.expect(TokenType.PURR);
-        this.expect(TokenType.LPAREN);
-
-        const argument = this.current().type === TokenType.STRING
-            ? this.parseStringLiteral()
-            : this.parseIdentifier();
-
-        this.expect(TokenType.RPAREN);
-
-        return {
-            type: 'PrintStatement',
-            argument
-        };
-    }
-
-    private parseVariableDeclaration(): VariableDeclaration {
-        this.expect(TokenType.MEOW);
-        const nameToken = this.expect(TokenType.IDENTIFIER);
-        this.expect(TokenType.EQUALS);
-
-        let value;
-
-        if (this.current().type === TokenType.INTEGER) {
-            value = this.parseIntegerLiteral();
-        } else if (this.current().type === TokenType.FLOAT) {
-            value = this.parseStringLiteral();
-        } else {
-            value = this.parseStringLiteral();
+    private parse(): Program {
+        const body: ASTNode[] = [];
+        while (this.current().type !== TokenType.EOF) {
+            body.push(this.parseStatement());
         }
-
-
-        return {
-            type: 'VariableDeclaration',
-            name: nameToken.value,
-            value
-        };
-    }
-
-    private parseVariableAccess(): VariableAccess {
-        this.expect(TokenType.WOOF);
-        const nameToken = this.expect(TokenType.IDENTIFIER);
-
-        return {
-            type: 'VariableAccess',
-            name: nameToken.value
-        };
+        return { type: NodeType.Program, body };
     }
 
     private parseStatement(): ASTNode {
-        const token = this.current();
-
-        switch (token.type) {
+        switch (this.current().type) {
             case TokenType.PURR:
                 return this.parsePrintStatement();
             case TokenType.MEOW:
@@ -110,20 +58,128 @@ export class Parser {
             case TokenType.WOOF:
                 return this.parseVariableAccess();
             default:
+                return this.parseExpression();
+        }
+    }
+
+    private parsePrintStatement(): PrintStatement {
+        this.expect(TokenType.PURR);
+        this.expect(TokenType.LPAREN);
+        const argument = this.parseExpression();
+        this.expect(TokenType.RPAREN);
+        return { type: NodeType.PrintStatement, argument };
+    }
+
+    private parseVariableDeclaration(): VariableDeclaration {
+        this.expect(TokenType.MEOW);
+        const name = this.expect(TokenType.IDENTIFIER).value;
+        this.expect(TokenType.EQUALS);
+        const value = this.parseExpression();
+        return { type: NodeType.VariableDeclaration, name, value };
+    }
+
+    private parseVariableAccess(): VariableAccess {
+        this.expect(TokenType.WOOF);
+        const name = this.expect(TokenType.IDENTIFIER).value;
+        return { type: NodeType.VariableAccess, name: name };
+    }
+
+    private parseExpression(): ASTNode {
+        return this.parseBinaryExpression();
+    }
+
+    private parsePrimaryExpression(): ASTNode {
+        const token = this.current();
+
+        if (token.type === TokenType.BINARY_OPERATOR && token.value === '-') {
+            return this.parseUnaryExpression();
+        }
+
+        switch (token.type) {
+            case TokenType.INTEGER:
+                return this.parseIntegerLiteral();
+            case TokenType.FLOAT:
+                return this.parseFloatLiteral();
+            case TokenType.STRING:
+                return this.parseStringLiteral();
+            case TokenType.IDENTIFIER:
+                return this.parseIdentifier();
+            case TokenType.LPAREN: {
+                this.advance(); // consume '('
+                const expr = this.parseExpression();
+                this.expect(TokenType.RPAREN);
+                return expr;
+            }
+            default:
                 throw new Error(`Unexpected token ${token.type} at line ${token.line}`);
         }
     }
 
-    public parse(): Program {
-        const body: ASTNode[] = [];
+    private parseUnaryExpression(): UnaryExpression {
+        const operator = this.advance().value;
+        const argument = this.parsePrimaryExpression();
+        return { type: NodeType.UnaryExpression, operator, argument };
+    }
 
-        while (this.current().type !== TokenType.EOF) {
-            body.push(this.parseStatement());
+    private parseBinaryExpression(parentPrecedence = 0): ASTNode {
+        let left = this.parsePrimaryExpression();
+
+        while (true) {
+            const operator = this.current().value;
+            const precedence = this.getBinaryOperatorPrecedence(operator);
+
+            if (precedence === 0 || precedence <= parentPrecedence) {
+                break;
+            }
+
+            this.advance(); // consume operator
+            const right = this.parseBinaryExpression(precedence);
+            left = {
+                type: NodeType.BinaryExpression,
+                operator,
+                left,
+                right,
+            } as BinaryExpression;
         }
 
-        return {
-            type: 'Program',
-            body
-        };
+        return left;
+    }
+
+    private getBinaryOperatorPrecedence(operator: string): number {
+        switch (operator) {
+            case '+':
+            case '-':
+                return 1;
+            case '*':
+            case '/':
+                return 2;
+            default:
+                return 0;
+        }
+    }
+
+    private parseStringLiteral(): StringLiteral {
+        const token = this.expect(TokenType.STRING);
+        return { type: NodeType.StringLiteral, value: token.value };
+    }
+
+    private parseIntegerLiteral(): IntegerLiteral {
+        const token = this.expect(TokenType.INTEGER);
+        return { type: NodeType.IntegerLiteral, value: parseInt(token.value, 10) };
+    }
+
+    private parseFloatLiteral(): FloatLiteral {
+        const token = this.expect(TokenType.FLOAT);
+        return { type: NodeType.FloatLiteral, value: parseFloat(token.value) };
+    }
+
+    private parseIdentifier(): Identifier {
+        const token = this.expect(TokenType.IDENTIFIER);
+        return { type: NodeType.Identifier, name: token.value };
+    }
+
+    public static parse(tokens: Token[]): Program {
+        const parser = new Parser(tokens);
+        return parser.parse();
     }
 }

@@ -1,8 +1,22 @@
-meow dogName = "Buddy"
-meow catName = "Whiskers"
-meow result =  69
+meow a = -10
+meow b = 20.5
 
-purr("Welcome to the pet store!")
-purr(dogName)
-purr(catName)
-purr(result)
+purr(a)
+purr(b)
+
+meow c = a + b
+purr(c)
+
+purr(-c)
+
+meow cat = a * b
+purr(cat)
+
+meow dog = b / 5
+purr(dog)
+
+purr(cat + dog)
+
+meow wordOne = "Hello, "
+meow wordTwo = "World!"
+purr(wordOne + wordTwo)
