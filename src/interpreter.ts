@@ -1,4 +1,4 @@
-import type { ASTNode, StringLiteral, Identifier, PrintStatement, VariableDeclaration, VariableAccess, Program } from "./types";
+import type { ASTNode, StringLiteral, Identifier, PrintStatement, VariableDeclaration, VariableAccess, Program, IntegerLiteral } from "./types";
 
 export class Interpreter {
     private variables: Map<string, any> = new Map();
@@ -7,6 +7,9 @@ export class Interpreter {
         switch (node.type) {
             case 'StringLiteral':
                 return (node as StringLiteral).value;
+
+            case 'IntegerLiteral':
+                return (node as IntegerLiteral).value;
 
             case 'Identifier':
                 const name = (node as Identifier).name;

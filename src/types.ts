@@ -2,6 +2,7 @@ export enum TokenType {
     // Literals
     STRING = 'STRING',
     INTEGER = 'INTEGER',
+    FLOAT = 'FLOAT',
     IDENTIFIER = 'IDENTIFIER',
 
     // Keywords  
@@ -34,6 +35,11 @@ export interface ASTNode {
 export interface StringLiteral extends ASTNode {
     type: 'StringLiteral';
     value: string;
+}
+
+export interface IntegerLiteral extends ASTNode {
+    type: 'IntegerLiteral';
+    value: number;
 }
 
 export interface Identifier extends ASTNode {

@@ -69,6 +69,14 @@ export class Lexer {
         return value;
     }
 
+    private readNumber(): string {
+        let value = '';
+        while (/[0-9]/.test(this.peek())) {
+            value += this.advance();
+        }
+        return value;
+    }
+
     private readIdentifier(): string {
         let value = '';
         while (/[a-zA-Z_]/.test(this.peek())) {
@@ -109,8 +117,8 @@ export class Lexer {
                 this.advance();
                 tokens.push({ type: TokenType.BINARY_OPERATOR, value: char, line, column });
             } else if (this.isInteger(char)) {
-                this.advance();
-                tokens.push({ type: TokenType.INTEGER, value: char, line, column });
+                const number = this.readNumber();
+                tokens.push({ type: TokenType.INTEGER, value: number, line, column });
             } else if (/[a-zA-Z_]/.test(char)) {
                 const identifier = this.readIdentifier();
                 let tokenType: TokenType;

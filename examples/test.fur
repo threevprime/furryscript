@@ -1,7 +1,8 @@
 meow dogName = "Buddy"
 meow catName = "Whiskers"
-meow result =  4
+meow result =  69
 
 purr("Welcome to the pet store!")
 purr(dogName)
 purr(catName)
+purr(result)

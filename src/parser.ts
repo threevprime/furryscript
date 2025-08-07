@@ -1,4 +1,4 @@
-import { TokenType, type StringLiteral, type Token, type Identifier, type PrintStatement, type VariableDeclaration, type VariableAccess, type Program, type ASTNode } from "./types";
+import { TokenType, type StringLiteral, type Token, type Identifier, type PrintStatement, type VariableDeclaration, type VariableAccess, type Program, type ASTNode, type IntegerLiteral } from "./types";
 
 export class Parser {
     private tokens: Token[];
@@ -34,6 +34,14 @@ export class Parser {
         };
     }
 
+    private parseIntegerLiteral(): IntegerLiteral {
+        const token = this.expect(TokenType.INTEGER);
+        return {
+            type: 'IntegerLiteral',
+            value: parseInt(token.value, 10)
+        };
+    }
+
     private parseIdentifier(): Identifier {
         const token = this.expect(TokenType.IDENTIFIER);
         return {
@@ -62,7 +70,17 @@ export class Parser {
         this.expect(TokenType.MEOW);
         const nameToken = this.expect(TokenType.IDENTIFIER);
         this.expect(TokenType.EQUALS);
-        const value = this.parseStringLiteral();
+
+        let value;
+
+        if (this.current().type === TokenType.INTEGER) {
+            value = this.parseIntegerLiteral();
+        } else if (this.current().type === TokenType.FLOAT) {
+            value = this.parseStringLiteral();
+        } else {
+            value = this.parseStringLiteral();
+        }
+
 
         return {
             type: 'VariableDeclaration',
