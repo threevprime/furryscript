@@ -6,7 +6,7 @@ export enum TokenType {
     IDENTIFIER = 'IDENTIFIER',
 
     // Keywords
-    TRICK = 'TRICK', // Function declaration
+    TRICK = 'TRICK', // function declaration
     PURR = 'PURR', // print function
     MEOW = 'MEOW', // variable declaration
     WOOF = 'WOOF', // variable access
@@ -15,6 +15,10 @@ export enum TokenType {
     EQUALS = 'EQUALS',
     LPAREN = 'LPAREN',
     RPAREN = 'RPAREN',
+    LBRACKET = 'LBRACKET',
+    RBRACKET = 'RBRACKET',
+    LBRACE = 'LBRACE',
+    RBRACE = 'RBRACE',
     BINARY_OPERATOR = 'BINARY_OPERATOR',
 
     // Special
@@ -38,6 +42,7 @@ export enum NodeType {
     PrintStatement = 'PrintStatement',
     VariableDeclaration = 'VariableDeclaration',
     VariableAccess = 'VariableAccess',
+    FunctionDeclaration = 'FunctionDeclaration',
     BinaryExpression = 'BinaryExpression',
     UnaryExpression = 'UnaryExpression',
 }
@@ -85,6 +90,13 @@ export interface VariableDeclaration extends ASTNode {
 export interface VariableAccess extends ASTNode {
     type: NodeType.VariableAccess;
     name: string;
+}
+
+export interface FunctionDeclaration extends ASTNode {
+    type: NodeType.FunctionDeclaration;
+    name: string;
+    argument: ASTNode;
+    value: ASTNode;
 }
 
 export interface BinaryExpression extends ASTNode {

@@ -8,6 +8,7 @@ import {
     type PrintStatement,
     type VariableDeclaration,
     type VariableAccess,
+    type FunctionDeclaration,
     type UnaryExpression,
     type BinaryExpression,
     NodeType,
@@ -30,6 +31,9 @@ export class Interpreter {
             case NodeType.VariableDeclaration:
                 this.executeVariableDeclaration(node as VariableDeclaration);
                 break;
+            case NodeType.FunctionDeclaration:
+                this.executeFunctionDeclaration(node as FunctionDeclaration);
+                break;
             case NodeType.VariableAccess:
                 this.evaluate(node); // Evaluate and discard result
                 break;
@@ -47,6 +51,14 @@ export class Interpreter {
     private executeVariableDeclaration(node: VariableDeclaration): void {
         const value = this.evaluate(node.value);
         this.variables.set(node.name, value);
+    }
+
+    private executeFunctionDeclaration(node: FunctionDeclaration): void {
+        // TODO: make the function do function stuff
+        const argument = this.evaluate(node.argument);
+        const value = this.evaluate(node.value);
+        console.log(argument);
+        console.log(value);
     }
 
     private evaluate(node: ASTNode): any {

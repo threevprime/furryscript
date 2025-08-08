@@ -123,6 +123,18 @@ export class Lexer {
             } else if (char === ')') {
                 this.advance();
                 tokens.push({ type: TokenType.RPAREN, value: ')', line, column });
+            } else if (char === '[') {
+                this.advance();
+                tokens.push({ type: TokenType.LBRACKET, value: '[', line, column });
+            } else if (char === ']') {
+                this.advance();
+                tokens.push({ type: TokenType.RBRACKET, value: ']', line, column });
+            } else if (char === '{') {
+                this.advance();
+                tokens.push({ type: TokenType.LBRACE, value: '{', line, column });
+            } else if (char === '}') {
+                this.advance();
+                tokens.push({ type: TokenType.RBRACE, value: '}', line, column });
             } else if (char === '=') {
                 this.advance();
                 tokens.push({ type: TokenType.EQUALS, value: '=', line, column });
@@ -143,6 +155,7 @@ export class Lexer {
                     case 'purr': tokenType = TokenType.PURR; break;
                     case 'meow': tokenType = TokenType.MEOW; break;
                     case 'woof': tokenType = TokenType.WOOF; break;
+                    case 'trick': tokenType = TokenType.TRICK; break;
                     default: tokenType = TokenType.IDENTIFIER; break;
                 }
 

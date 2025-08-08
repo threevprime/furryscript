@@ -10,6 +10,7 @@ import {
     type PrintStatement,
     type VariableDeclaration,
     type VariableAccess,
+    type FunctionDeclaration,
     type UnaryExpression,
     type BinaryExpression,
     NodeType,
@@ -57,6 +58,8 @@ export class Parser {
                 return this.parseVariableDeclaration();
             case TokenType.WOOF:
                 return this.parseVariableAccess();
+            case TokenType.TRICK:
+                return this.parseFunctionDeclaration();
             default:
                 return this.parseExpression();
         }
@@ -82,6 +85,18 @@ export class Parser {
         this.expect(TokenType.WOOF);
         const name = this.expect(TokenType.IDENTIFIER).value;
         return { type: NodeType.VariableAccess, name: name };
+    }
+
+    private parseFunctionDeclaration(): FunctionDeclaration {
+        this.expect(TokenType.TRICK);
+        const name = this.expect(TokenType.IDENTIFIER).value;
+        this.expect(TokenType.LPAREN);
+        const argument = this.parseExpression();
+        this.expect(TokenType.RPAREN);
+        this.expect(TokenType.LBRACE);
+        const value = this.parseExpression();
+        this.expect(TokenType.RBRACE);
+        return { type: NodeType.FunctionDeclaration, name, argument, value };
     }
 
     private parseExpression(): ASTNode {
