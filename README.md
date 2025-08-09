@@ -7,7 +7,7 @@ FurryScript is a simple, dynamic programming language built for learning and exp
 *   **Variable Declaration**: Create variables for strings, integers, and floats.
 *   **Arithmetic**: Perform basic calculations (`+`, `-`, `*`, `/`).
 *   **Console Output**: Print values to the console.
-*   **Functions**: Define and call your own custom functions.
+*   **Functions**: Define and call your own custom functions, with support for parameters and return values (`wag`).
 
 ## Installation
 
@@ -49,13 +49,21 @@ purr("This is pawsome!")
 ### Functions
 
 ```javascript
-// Define a function
+// Define a function that doesn't return a value
 trick greet(name) {
   purr("Hello, " + name)
 }
 
-// Call the function
+// Define a function that returns a value
+trick add(a, b) {
+  wag a + b
+}
+
+// Call the functions
 greet("FurryScript")
+
+meow sum = add(5, 10)
+purr("5 + 10 = " + sum)
 ```
 
 ## How It Works

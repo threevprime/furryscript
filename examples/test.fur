@@ -1,12 +1,40 @@
-meow a = 1
-meow b = 2
-meow c = a + b
-purr(c)
+// examples/test.fur - A showcase of all FurryScript features
 
-meow word = "Joe"
+// --- Variable Declarations ---
+purr("---" + "-" + "-" + "-" + " Variables ---")
+meow greeting = "Hello, FurryScript!"
+meow score = 100
+meow pi = 3.14
 
-trick greet(name) {
-    purr("Hello " + name + "!")
+purr(greeting)
+purr(score)
+purr(pi)
+
+// --- Arithmetic ---
+purr("\n--- Arithmetic ---")
+meow a = 20
+meow b = 5
+purr("a = 20, b = 5")
+purr("a + b = " + (a + b))
+purr("a - b = " + (a - b))
+purr("a * b = " + (a * b))
+purr("a / b = " + (a / b))
+
+// --- Functions ---
+purr("\n--- Functions ---")
+
+// A function that takes two numbers and returns their sum
+trick add(x, y) {
+  wag x + y
 }
 
-greet(word)
+// A function that takes a name and prints a greeting
+trick sayHello(name) {
+  purr("Pawsome to meet you, " + name + "!")
+}
+
+// Calling the functions
+meow sum = add(15, 30)
+purr("The sum of 15 and 30 is: " + sum)
+
+sayHello("Furry Dev")

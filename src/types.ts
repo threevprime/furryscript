@@ -10,6 +10,7 @@ export enum TokenType {
     PURR = 'PURR', // print function
     MEOW = 'MEOW', // variable declaration
     WOOF = 'WOOF', // variable access
+    WAG = 'WAG', // return statement
 
     // Operators/Punctuation
     EQUALS = 'EQUALS',
@@ -19,6 +20,7 @@ export enum TokenType {
     RBRACKET = 'RBRACKET',
     LBRACE = 'LBRACE',
     RBRACE = 'RBRACE',
+    COMMA = 'COMMA',
     BINARY_OPERATOR = 'BINARY_OPERATOR',
 
     // Special
@@ -44,6 +46,7 @@ export enum NodeType {
     VariableAccess = 'VariableAccess',
     FunctionDeclaration = 'FunctionDeclaration',
     FunctionCall = 'FunctionCall',
+    ReturnStatement = 'ReturnStatement',
     BinaryExpression = 'BinaryExpression',
     UnaryExpression = 'UnaryExpression',
 }
@@ -104,6 +107,11 @@ export interface FunctionCall extends ASTNode {
     type: NodeType.FunctionCall;
     name: string;
     arguments: ASTNode[];
+}
+
+export interface ReturnStatement extends ASTNode {
+    type: NodeType.ReturnStatement;
+    argument: ASTNode;
 }
 
 export interface BinaryExpression extends ASTNode {

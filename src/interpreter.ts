@@ -10,10 +10,15 @@ import {
     type VariableAccess,
     type FunctionDeclaration,
     type FunctionCall,
+    type ReturnStatement,
     type UnaryExpression,
     type BinaryExpression,
     NodeType,
 } from './types';
+
+class ReturnValue {
+    constructor(public value: any) {}
+}
 
 export class Interpreter {
     private variables: Map<string, any> = new Map();
@@ -25,26 +30,27 @@ export class Interpreter {
         }
     }
 
-    private execute(node: ASTNode): void {
+    private execute(node: ASTNode): any {
         switch (node.type) {
             case NodeType.PrintStatement:
                 this.executePrintStatement(node as PrintStatement);
-                break;
+                return;
             case NodeType.VariableDeclaration:
                 this.executeVariableDeclaration(node as VariableDeclaration);
-                break;
+                return;
             case NodeType.FunctionDeclaration:
                 this.executeFunctionDeclaration(node as FunctionDeclaration);
-                break;
+                return;
             case NodeType.FunctionCall:
-                this.executeFunctionCall(node as FunctionCall);
-                break;
+                return this.executeFunctionCall(node as FunctionCall);
+            case NodeType.ReturnStatement:
+                return new ReturnValue(this.evaluate((node as ReturnStatement).argument));
             case NodeType.VariableAccess:
                 this.evaluate(node); // Evaluate and discard result
-                break;
+                return;
             default:
                 // If it's not a statement, it might be an expression to evaluate
-                this.evaluate(node);
+                return this.evaluate(node);
         }
     }
 
@@ -79,17 +85,16 @@ export class Interpreter {
             this.variables.set(paramName, argValue);
         }
 
-        let returnValue: any;
         for (const statement of func.body) {
-            if (statement.type === NodeType.PrintStatement) {
-                this.executePrintStatement(statement as PrintStatement);
-            } else {
-                returnValue = this.execute(statement);
+            const result = this.execute(statement);
+            if (result instanceof ReturnValue) {
+                this.variables = previousVariables;
+                return result.value;
             }
         }
 
         this.variables = previousVariables;
-        return returnValue;
+        return undefined; // Implicit return
     }
 
     private evaluate(node: ASTNode): any {

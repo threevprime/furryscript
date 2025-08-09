@@ -35,8 +35,18 @@ export class Lexer {
     }
 
     private skipWhitespace(): void {
-        while (/\s/.test(this.peek())) {
-            this.advance();
+        while (true) {
+            const char = this.peek();
+            if (char === ' ' || char === '\t' || char === '\r' || char === '\n') {
+                this.advance();
+            } else if (char === '/' && this.source[this.position + 1] === '/') {
+                // It's a comment, skip to the end of the line
+                while (this.peek() !== '\n' && this.peek() !== '\0') {
+                    this.advance();
+                }
+            } else {
+                break;
+            }
         }
     }
 
@@ -135,6 +145,9 @@ export class Lexer {
             } else if (char === '}') {
                 this.advance();
                 tokens.push({ type: TokenType.RBRACE, value: '}', line, column });
+            } else if (char === ',') {
+                this.advance();
+                tokens.push({ type: TokenType.COMMA, value: ',', line, column });
             } else if (char === '=') {
                 this.advance();
                 tokens.push({ type: TokenType.EQUALS, value: '=', line, column });
@@ -156,6 +169,7 @@ export class Lexer {
                     case 'meow': tokenType = TokenType.MEOW; break;
                     case 'woof': tokenType = TokenType.WOOF; break;
                     case 'trick': tokenType = TokenType.TRICK; break;
+                    case 'wag': tokenType = TokenType.WAG; break;
                     default: tokenType = TokenType.IDENTIFIER; break;
                 }
 

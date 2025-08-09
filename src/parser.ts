@@ -12,6 +12,7 @@ import {
     type VariableAccess,
     type FunctionDeclaration,
     type FunctionCall,
+    type ReturnStatement,
     type UnaryExpression,
     type BinaryExpression,
     NodeType,
@@ -63,6 +64,8 @@ export class Parser {
                 return this.parseVariableDeclaration();
             case TokenType.TRICK:
                 return this.parseFunctionDeclaration();
+            case TokenType.WAG:
+                return this.parseReturnStatement();
             case TokenType.IDENTIFIER:
                 if (this.peek().type === TokenType.LPAREN) {
                     return this.parseFunctionCall();
@@ -103,7 +106,10 @@ export class Parser {
         if (this.current().type !== TokenType.RPAREN) {
             do {
                 parameters.push(this.parseIdentifier());
-            } while (this.current().type === TokenType.IDENTIFIER && this.advance());
+                if (this.current().type === TokenType.COMMA) {
+                    this.advance(); // consume comma
+                }
+            } while (this.current().type !== TokenType.RPAREN);
         }
 
         this.expect(TokenType.RPAREN);
@@ -126,11 +132,20 @@ export class Parser {
         if (this.current().type !== TokenType.RPAREN) {
             do {
                 args.push(this.parseExpression());
-            } while (this.current().type === TokenType.IDENTIFIER && this.advance());
+                if (this.current().type === TokenType.COMMA) {
+                    this.advance(); // consume comma
+                }
+            } while (this.current().type !== TokenType.RPAREN);
         }
 
         this.expect(TokenType.RPAREN);
         return { type: NodeType.FunctionCall, name, arguments: args };
+    }
+
+    private parseReturnStatement(): ReturnStatement {
+        this.expect(TokenType.WAG);
+        const argument = this.parseExpression();
+        return { type: NodeType.ReturnStatement, argument };
     }
 
     private parseExpression(): ASTNode {
