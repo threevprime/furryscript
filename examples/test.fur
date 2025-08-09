@@ -1,22 +1,12 @@
-meow a = -10
-meow b = 20.5
-
-purr(a)
-purr(b)
-
+meow a = 1
+meow b = 2
 meow c = a + b
 purr(c)
 
-purr(-c)
+meow word = "Joe"
 
-meow cat = a * b
-purr(cat)
+trick greet(name) {
+    purr("Hello " + name + "!")
+}
 
-meow dog = b / 5
-purr(dog)
-
-purr(cat + dog)
-
-meow wordOne = "Hello, "
-meow wordTwo = "World!"
-purr(wordOne + wordTwo)
+greet(word)

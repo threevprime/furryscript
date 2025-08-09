@@ -11,6 +11,7 @@ import {
     type VariableDeclaration,
     type VariableAccess,
     type FunctionDeclaration,
+    type FunctionCall,
     type UnaryExpression,
     type BinaryExpression,
     NodeType,
@@ -26,6 +27,10 @@ export class Parser {
 
     private current(): Token {
         return this.tokens[this.position] || { type: TokenType.EOF, value: '', line: 0, column: 0 };
+    }
+
+    private peek(): Token {
+        return this.tokens[this.position + 1] || { type: TokenType.EOF, value: '', line: 0, column: 0 };
     }
 
     private advance(): Token {
@@ -56,10 +61,13 @@ export class Parser {
                 return this.parsePrintStatement();
             case TokenType.MEOW:
                 return this.parseVariableDeclaration();
-            case TokenType.WOOF:
-                return this.parseVariableAccess();
             case TokenType.TRICK:
                 return this.parseFunctionDeclaration();
+            case TokenType.IDENTIFIER:
+                if (this.peek().type === TokenType.LPAREN) {
+                    return this.parseFunctionCall();
+                }
+                return this.parseVariableAccess();
             default:
                 return this.parseExpression();
         }
@@ -82,7 +90,6 @@ export class Parser {
     }
 
     private parseVariableAccess(): VariableAccess {
-        this.expect(TokenType.WOOF);
         const name = this.expect(TokenType.IDENTIFIER).value;
         return { type: NodeType.VariableAccess, name: name };
     }
@@ -91,12 +98,39 @@ export class Parser {
         this.expect(TokenType.TRICK);
         const name = this.expect(TokenType.IDENTIFIER).value;
         this.expect(TokenType.LPAREN);
-        const argument = this.parseExpression();
+
+        const parameters: Identifier[] = [];
+        if (this.current().type !== TokenType.RPAREN) {
+            do {
+                parameters.push(this.parseIdentifier());
+            } while (this.current().type === TokenType.IDENTIFIER && this.advance());
+        }
+
         this.expect(TokenType.RPAREN);
         this.expect(TokenType.LBRACE);
-        const value = this.parseExpression();
+
+        const body: ASTNode[] = [];
+        while (this.current().type !== TokenType.RBRACE && this.current().type !== TokenType.EOF) {
+            body.push(this.parseStatement());
+        }
+
         this.expect(TokenType.RBRACE);
-        return { type: NodeType.FunctionDeclaration, name, argument, value };
+        return { type: NodeType.FunctionDeclaration, name, parameters, body };
+    }
+
+    private parseFunctionCall(): FunctionCall {
+        const name = this.expect(TokenType.IDENTIFIER).value;
+        this.expect(TokenType.LPAREN);
+
+        const args: ASTNode[] = [];
+        if (this.current().type !== TokenType.RPAREN) {
+            do {
+                args.push(this.parseExpression());
+            } while (this.current().type === TokenType.IDENTIFIER && this.advance());
+        }
+
+        this.expect(TokenType.RPAREN);
+        return { type: NodeType.FunctionCall, name, arguments: args };
     }
 
     private parseExpression(): ASTNode {
@@ -118,6 +152,9 @@ export class Parser {
             case TokenType.STRING:
                 return this.parseStringLiteral();
             case TokenType.IDENTIFIER:
+                if (this.peek().type === TokenType.LPAREN) {
+                    return this.parseFunctionCall();
+                }
                 return this.parseIdentifier();
             case TokenType.LPAREN: {
                 this.advance(); // consume '('

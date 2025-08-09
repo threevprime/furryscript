@@ -9,6 +9,7 @@ import {
     type VariableDeclaration,
     type VariableAccess,
     type FunctionDeclaration,
+    type FunctionCall,
     type UnaryExpression,
     type BinaryExpression,
     NodeType,
@@ -16,6 +17,7 @@ import {
 
 export class Interpreter {
     private variables: Map<string, any> = new Map();
+    private functions: Map<string, FunctionDeclaration> = new Map();
 
     public interpret(ast: Program): void {
         for (const statement of ast.body) {
@@ -33,6 +35,9 @@ export class Interpreter {
                 break;
             case NodeType.FunctionDeclaration:
                 this.executeFunctionDeclaration(node as FunctionDeclaration);
+                break;
+            case NodeType.FunctionCall:
+                this.executeFunctionCall(node as FunctionCall);
                 break;
             case NodeType.VariableAccess:
                 this.evaluate(node); // Evaluate and discard result
@@ -54,11 +59,37 @@ export class Interpreter {
     }
 
     private executeFunctionDeclaration(node: FunctionDeclaration): void {
-        // TODO: make the function do function stuff
-        const argument = this.evaluate(node.argument);
-        const value = this.evaluate(node.value);
-        console.log(argument);
-        console.log(value);
+        this.functions.set(node.name, node);
+    }
+
+    private executeFunctionCall(node: FunctionCall): any {
+        const func = this.functions.get(node.name);
+        if (!func) {
+            throw new Error(`Undefined function: ${node.name}`);
+        }
+
+        if (node.arguments.length !== func.parameters.length) {
+            throw new Error(`Expected ${func.parameters.length} arguments, but got ${node.arguments.length}`);
+        }
+
+        const previousVariables = new Map(this.variables);
+        for (let i = 0; i < func.parameters.length; i++) {
+            const paramName = func.parameters[i].name;
+            const argValue = this.evaluate(node.arguments[i]);
+            this.variables.set(paramName, argValue);
+        }
+
+        let returnValue: any;
+        for (const statement of func.body) {
+            if (statement.type === NodeType.PrintStatement) {
+                this.executePrintStatement(statement as PrintStatement);
+            } else {
+                returnValue = this.execute(statement);
+            }
+        }
+
+        this.variables = previousVariables;
+        return returnValue;
     }
 
     private evaluate(node: ASTNode): any {
@@ -73,6 +104,8 @@ export class Interpreter {
                 return this.evaluateIdentifier(node as Identifier);
             case NodeType.VariableAccess:
                 return this.evaluateVariableAccess(node as VariableAccess);
+            case NodeType.FunctionCall:
+                return this.executeFunctionCall(node as FunctionCall);
             case NodeType.UnaryExpression:
                 return this.evaluateUnaryExpression(node as UnaryExpression);
             case NodeType.BinaryExpression:

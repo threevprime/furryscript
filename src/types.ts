@@ -43,6 +43,7 @@ export enum NodeType {
     VariableDeclaration = 'VariableDeclaration',
     VariableAccess = 'VariableAccess',
     FunctionDeclaration = 'FunctionDeclaration',
+    FunctionCall = 'FunctionCall',
     BinaryExpression = 'BinaryExpression',
     UnaryExpression = 'UnaryExpression',
 }
@@ -95,8 +96,14 @@ export interface VariableAccess extends ASTNode {
 export interface FunctionDeclaration extends ASTNode {
     type: NodeType.FunctionDeclaration;
     name: string;
-    argument: ASTNode;
-    value: ASTNode;
+    parameters: Identifier[];
+    body: ASTNode[];
+}
+
+export interface FunctionCall extends ASTNode {
+    type: NodeType.FunctionCall;
+    name: string;
+    arguments: ASTNode[];
 }
 
 export interface BinaryExpression extends ASTNode {
