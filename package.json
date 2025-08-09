@@ -1,7 +1,14 @@
 {
     "name": "furryscript",
-    "module": "index.ts",
+    "version": "0.1.0",
+    "author": "Threevprime",
+    "module": "dist/index.js",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
     "type": "module",
+    "files": [
+        "dist"
+    ],
     "devDependencies": {
         "@types/bun": "^1.2.19"
     },
@@ -9,6 +16,7 @@
         "typescript": "^5.0.0"
     },
     "scripts": {
-        "dev": "bun run src/index.ts"
+        "dev": "bun run src/index.ts",
+        "build": "bun build src/index.ts --outdir dist"
     }
 }
